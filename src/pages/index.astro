@@ -93,14 +93,16 @@ function getHolidayLabel(date: Date): string | null {
   const day = date.getUTCDate();
   const month = date.getUTCMonth() + 1;
   for (const holiday of publicHolidays) {
-    if (month === holiday.month && day === holiday.day) return holiday.label;
+    if (month === holiday.month && day === holiday.day) {
+      return holiday.label;
+    }
   }
 
   return null;
 }
 
 interface Day {
-  number: number;
+  number: number | null;
   isOff: boolean;
   holidayLabel: string | null;
 }
@@ -111,11 +113,8 @@ function getCalendarData(year: number): Day[][][] {
 
   for (let month = 0; month < 12; month++) {
     const monthData: Day[][] = [];
-    const firstDay = new Date(Date.UTC(year, month, 1));
-    const lastDay = new Date(Date.UTC(year, month + 1, 0));
-
     let currentWeek: Day[] = [];
-
+    const firstDay = new Date(Date.UTC(year, month, 1));
     // Determine the start of the week
     let startOfWeek = new Date(firstDay);
     while (formatter.format(startOfWeek) !== "pirmadienis") {
@@ -130,7 +129,7 @@ function getCalendarData(year: number): Day[][][] {
       const isCurrentMonth = currentDate.getUTCMonth() === month;
 
       const day: Day = {
-        number: isCurrentMonth ? currentDate.getUTCDate() : 0,
+        number: isCurrentMonth ? currentDate.getUTCDate() : null,
         isOff: isDayOff(currentDate, year),
         holidayLabel: getHolidayLabel(currentDate),
       };
@@ -151,7 +150,7 @@ function getCalendarData(year: number): Day[][][] {
 
 function getCellClass(day: Day): string {
   const baseClass = "p-2 text-center relative group";
-  if (day.number === 0) return `${baseClass} text-gray-300`;
+  if (day.number == null) return `${baseClass} text-gray-300`;
   if (day.isOff) return `${baseClass} bg-red-100 font-bold`;
   return baseClass;
 }
@@ -191,7 +190,7 @@ const monthNames: string[] = Array.from({ length: 12 }, (_, i) => {
                 <tr>
                   {week.map((day) => (
                     <td class={getCellClass(day)}>
-                      {day.number !== 0 && day.number}
+                      {day.number}
                       {day.holidayLabel && (
                         <span class="invisible group-hover:visible absolute z-10 w-40 bg-gray-800 text-white text-center rounded-md py-2 px-3 -mt-1 ml-6 text-xs">
                           {day.holidayLabel}
