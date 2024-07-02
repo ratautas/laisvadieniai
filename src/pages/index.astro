@@ -73,19 +73,16 @@ const publicHolidays = [
 type Holiday = (typeof publicHolidays)[number];
 
 function isHoliday(date: Date): boolean {
+  const month = date.getUTCMonth() + 1;
+  const day = date.getUTCDate();
   return publicHolidays.some((holiday: Holiday) => {
-    return (
-      date.getUTCMonth() + 1 === holiday.month &&
-      date.getUTCDate() === holiday.day
-    );
+    return month === holiday.month && day === holiday.day;
   });
 }
 
 function isWeekend(date: Date): boolean {
-  const weekday = new Intl.DateTimeFormat(LOCALE, { weekday: "long" }).format(
-    date
-  );
-  return ["šeštadienis", "sekmadienis"].includes(weekday.toLowerCase());
+  const day = date.getUTCDay();
+  return day === 0 || day === 6;
 }
 
 function isDayOff(date: Date, year: number): boolean {
@@ -118,7 +115,6 @@ function getCalendarData(year: number): Day[][][] {
     const monthData: Day[][] = [];
     const firstDay = new Date(Date.UTC(year, month, 1));
     const lastDay = new Date(Date.UTC(year, month + 1, 0));
-    const daysInMonth = lastDay.getUTCDate();
 
     let currentWeek: Day[] = [];
 
