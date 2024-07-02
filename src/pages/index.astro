@@ -73,8 +73,8 @@ const publicHolidays = [
 type Holiday = (typeof publicHolidays)[number];
 
 function isHoliday(date: Date): boolean {
-  const month = date.getUTCMonth() + 1;
   const day = date.getUTCDate();
+  const month = date.getUTCMonth() + 1;
   return publicHolidays.some((holiday: Holiday) => {
     return month === holiday.month && day === holiday.day;
   });
@@ -90,12 +90,10 @@ function isDayOff(date: Date, year: number): boolean {
 }
 
 function getHolidayLabel(date: Date): string | null {
+  const day = date.getUTCDate();
+  const month = date.getUTCMonth() + 1;
   for (const holiday of publicHolidays) {
-    if (
-      date.getUTCMonth() + 1 === holiday.month &&
-      date.getUTCDate() === holiday.day
-    )
-      return holiday.label;
+    if (month === holiday.month && day === holiday.day) return holiday.label;
   }
 
   return null;
