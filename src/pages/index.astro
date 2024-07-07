@@ -1,4 +1,5 @@
 ---
+import { Icon } from 'astro-icon/components';
 import Layout from "../layouts/Layout.astro";
 
 const CURRENT_YEAR: number = 2023;
@@ -218,35 +219,40 @@ const monthNames: string[] = Array.from({ length: 12 }, (_, i) => {
 ---
 
 <Layout title="Kalendorius">
-  <h1 class="text-4xl font-bold mb-8">{CURRENT_YEAR} Kalendorius</h1>
-  <div class="bg-white rounded shadow p-6 mb-8">
-    <h2 class="text-2xl font-semibold mb-4">Opportunity Summary</h2>
-    <ul class="list-disc list-inside">
-      {opportunities.map(({ month, days }) => (
-        <li class="mb-2">
-          <strong>{monthNames[month]}</strong>: {days.join(', ')}
-        </li>
-      ))}
-    </ul>
+  <div class="bg-gradient-to-r from-blue-500 to-purple-600 text-white py-12 px-6 rounded-lg shadow-lg mb-12">
+    <h1 class="text-4xl font-bold mb-6 font-heading">{CURRENT_YEAR} Kalendorius</h1>
+    <div class="bg-white bg-opacity-20 rounded-lg p-6">
+      <h2 class="text-2xl font-semibold mb-4 flex items-center">
+        <Icon name="bi:calendar-check" class="w-8 h-8 mr-2" />
+        <span>Opportunity Summary</span>
+      </h2>
+      <ul class="list-none">
+        {opportunities.map(({ month, days }) => (
+          <li class="mb-2">
+            <span class="font-bold">{monthNames[month]}</span>: {days.join(', ')}
+          </li>
+        ))}
+      </ul>
+    </div>
   </div>
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
     {
       calendarData.map((month, monthIndex) => (
-        <div class="bg-white rounded shadow">
-          <h2 class="text-xl font-semibold p-4 bg-gray-100">
+        <div class="bg-white rounded-lg shadow-md">
+          <h2 class="text-xl font-semibold px-6 py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg">
             {monthNames[monthIndex]}
           </h2>
           <table class="w-full">
             <thead>
-              <tr>
+              <tr class="bg-gray-100 text-gray-600 uppercase text-sm leading-normal">
                 {weekdays.map((day) => (
-                  <th class="p-2 text-center">{day}</th>
+                  <th class="py-3 px-4 text-center">{day}</th>
                 ))}
               </tr>
             </thead>
-            <tbody>
+            <tbody class="text-gray-600">
               {month.map((week) => (
-                <tr>
+                <tr class="border-b border-gray-200 hover:bg-gray-50">
                   {week.map((day) => (
                     <td class={getCellClass(day)}>
                       {day.number}
@@ -267,3 +273,15 @@ const monthNames: string[] = Array.from({ length: 12 }, (_, i) => {
     }
   </div>
 </Layout>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600&family=Roboto:wght@400;500&display=swap');
+  
+  :global(body) {
+    font-family: 'Roboto', sans-serif;
+  }
+  
+  .font-heading {
+    font-family: 'Montserrat', sans-serif;
+  }
+</style>
