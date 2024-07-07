@@ -1,7 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
 
-const CURRENT_YEAR: number = 2023;
+const CURRENT_YEAR: number = 2024;
 const LOCALE: string = "lt-LT";
 const weekFormatter = new Intl.DateTimeFormat(LOCALE, { weekday: "short" });
 
@@ -103,7 +103,7 @@ function getHolidayLabel(date: Date): string | null {
 }
 
 interface Day {
-  number?: number | null;
+  number: number;
   isCurrent: boolean;
   holidayLabel?: string | null;
   isHoliday: boolean;
@@ -112,63 +112,77 @@ interface Day {
 }
 
 function getCalendarData(year: number): Day[][][] {
-  const months: Day[][][] = [];
-
-  for (let month = 0; month < 12; month++) {
-    let currentWeek: Day[] = [];
-    const monthData: Day[][] = [];
+  return Array.from({ length: 12 }, (_, month) => {
     const firstDay = new Date(Date.UTC(year, month, 1));
-    // Determine the start of the week
     let startOfWeek = new Date(firstDay);
-    // console.log(startOfWeek.getUTCDay());
     while (startOfWeek.getUTCDay() !== 1) {
       startOfWeek.setUTCDate(startOfWeek.getUTCDate() - 1);
     }
 
-    // Fill in the days
-    for (let i = 0; i < 6 * 7; i++) {
+    return Array.from({ length: 6 * 7 }, (_, i) => {
       const date = new Date(startOfWeek);
       date.setUTCDate(startOfWeek.getUTCDate() + i);
       const isCurrentMonth = date.getUTCMonth() === month;
-      
+
       const day: Day = {
-        number: isCurrentMonth ? date.getUTCDate() : null,
+        number: date.getUTCDate(),
         isHoliday: isHoliday(date),
         isWeekend: isWeekend(date),
         isOpportunity: false,
-        isCurrent: true,
+        isCurrent: isCurrentMonth,
         holidayLabel: getHolidayLabel(date),
       };
 
-      if (!isDayOff(date)) {
-        const offHits = [];
-        for (let j = -2; j <= 2; j++) {
+      if (isCurrentMonth && !isDayOff(date)) {
+        const offHits = Array.from({ length: 5 }, (_, j) => {
           const offDate = new Date(date);
-          offDate.setUTCDate(date.getUTCDate() + j);
-          if (isDayOff(offDate)) offHits.push(offDate);
-        }
-        if (offHits.length >= 3) {
+          offDate.setUTCDate(date.getUTCDate() + j - 2);
+          return isDayOff(offDate);
+        });
+        if (offHits.filter(Boolean).length >= 3) {
           day.isOpportunity = true;
         }
       }
 
-      currentWeek.push(day);
-
-      if (currentWeek.length === 7) {
-        monthData.push(currentWeek);
-        currentWeek = [];
-      }
-    }
-
-    months.push(monthData);
-  }
-
-  return months;
+      return day;
+    })
+      .reduce((weeks, day, i) => {
+        const weekIndex = Math.floor(i / 7);
+        if (!weeks[weekIndex]) {
+          weeks[weekIndex] = [];
+        }
+        weeks[weekIndex].push(day);
+        return weeks;
+      }, [] as Day[][])
+      .map((week) => {
+        return week.map((day, i) => {
+          if (day.isOpportunity) {
+            const prevDay = week[i - 1];
+            const nextDay = week[i + 1];
+            if (
+              prevDay &&
+              prevDay.isCurrent &&
+              !isDayOff(new Date(Date.UTC(year, month, prevDay.number)))
+            ) {
+              prevDay.isOpportunity = true;
+            }
+            if (
+              nextDay &&
+              nextDay.isCurrent &&
+              !isDayOff(new Date(Date.UTC(year, month, nextDay.number)))
+            ) {
+              nextDay.isOpportunity = true;
+            }
+          }
+          return day;
+        });
+      });
+  });
 }
 
 function getCellClass(day: Day): string {
   const baseClass = "p-2 text-center relative group";
-  if (day.number == null) return `${baseClass} text-gray-300`;
+  if (!day.isCurrent) return `${baseClass} text-gray-300`;
   if (day.isOpportunity) return `${baseClass} bg-green-300 font-bold`;
   if (day.isHoliday) return `${baseClass} bg-red-200`;
   if (day.isWeekend) return `${baseClass} bg-gray-100`;
