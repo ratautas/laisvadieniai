@@ -49,15 +49,12 @@ const currentPath = Astro.url.pathname;
 
     <!-- Canonical URL -->
     <link rel="canonical" href={canonicalURL} />
-
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@700;800&family=Manrope:wght@500;700&display=swap" rel="stylesheet">
   </head>
   <body class="font-sans">
     <nav class="navbar">
       <div class="navbar-container">
         <div class="navbar-brand">
-          <a href="/" class="navbar-item">Lithuanian Holidays</a>
+          <a href="/" class="navbar-item">Lietuvos šventės</a>
           <label for="navbar-toggle" class="navbar-burger">
             <span aria-hidden="true"></span>
             <span aria-hidden="true"></span>
@@ -71,25 +68,25 @@ const currentPath = Astro.url.pathname;
               href="/"
               class={currentPath === "/"
                 ? "navbar-item is-active"
-                : "navbar-item"}>Home</a
+                : "navbar-item"}>Pradžia</a
             >
             <a
-              href="/about"
-              class={currentPath === "/about"
+              href="/apie"
+              class={currentPath === "/apie"
                 ? "navbar-item is-active"
-                : "navbar-item"}>About</a
+                : "navbar-item"}>Apie</a
             >
             <a
-              href="/holidays"
-              class={currentPath === "/holidays"
+              href="/sventes"
+              class={currentPath === "/sventes"
                 ? "navbar-item is-active"
-                : "navbar-item"}>Holidays</a
+                : "navbar-item"}>Šventės</a
             >
             <a
-              href="/contact"
-              class={currentPath === "/contact"
+              href="/kontaktai"
+              class={currentPath === "/kontaktai"
                 ? "navbar-item is-active"
-                : "navbar-item"}>Contact</a
+                : "navbar-item"}>Kontaktai</a
             >
           </div>
         </div>

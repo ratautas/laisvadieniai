@@ -1,0 +1,90 @@
+---
+import { Icon } from "astro-icon/components";
+import {
+  getCalendarData,
+  getOpportunities,
+  getCellClass,
+} from "../utils/calendarUtils";
+import { getMonthNames, getWeekdayNames } from "../utils/dateUtils";
+
+interface Props {
+  year: number;
+}
+
+const { year } = Astro.props;
+
+const calendarData = getCalendarData(year);
+const opportunities = getOpportunities(calendarData);
+const monthNames = getMonthNames(year);
+const weekdays = getWeekdayNames();
+---
+
+<div class="container mx-auto px-8 py-16">
+  <div
+    class="bg-gradient-to-r from-slate-800 to-slate-900 text-white py-20 px-12 rounded-lg shadow-xl mb-20"
+  >
+    <h1
+      class="text-6xl font-extrabold mb-12 font-heading tracking-tight text-center"
+    >
+      {year} Kalendorius
+    </h1>
+    <div class="bg-white bg-opacity-10 rounded-lg p-12">
+      <h2
+        class="text-3xl font-bold mb-8 flex items-center justify-center font-heading"
+      >
+        <Icon
+          name="ic:round-event-available"
+          class="w-10 h-10 mr-3 text-amber-400"
+        />
+        <span>Galimybių santrauka</span>
+      </h2>
+      <ul class="list-none text-xl font-medium space-y-6">
+        {
+          opportunities.map(({ month, days }) => (
+            <li>
+              <span class="font-bold">{monthNames[month]}</span>:{" "}
+              {days.join(", ")}
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12">
+    {
+      calendarData.map((month, monthIndex) => (
+        <div class="bg-white rounded-lg shadow-lg">
+          <h2 class="text-2xl font-bold py-6 bg-gradient-to-r from-slate-700 to-slate-800 text-white font-heading tracking-tight text-center uppercase">
+            {monthNames[monthIndex]}
+          </h2>
+          <table class="w-full">
+            <thead>
+              <tr class="bg-gray-50 text-gray-700 uppercase text-base font-bold">
+                {weekdays.map((day) => (
+                  <th class="py-4 px-2 text-center">{day}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody class="text-gray-700 font-medium">
+              {month.map((week) => (
+                <tr class="border-b border-gray-200 hover:bg-gray-100">
+                  {week.map((day) => (
+                    <td class={getCellClass(day)}>
+                      {day.number}
+                      {day.holidayLabel && (
+                        <span class="invisible group-hover:visible absolute z-10 w-48 bg-gray-800 text-white text-center rounded-md py-3 px-4 -mt-2 ml-8 text-sm">
+                          {day.holidayLabel}
+                          <span class="absolute left-0 top-1/2 -ml-2 -mt-2 border-4 border-transparent border-r-gray-800" />
+                        </span>
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ))
+    }
+  </div>
+</div>

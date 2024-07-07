@@ -1,0 +1,25 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Calendar from "../components/Calendar.astro";
+
+export function getStaticPaths() {
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 10 }, (_, i) => currentYear + i - 5);
+  return years.map(year => ({ params: { year: year.toString() } }));
+}
+
+const { year } = Astro.params;
+const yearNumber = parseInt(year, 10);
+
+if (isNaN(yearNumber)) {
+  return Astro.redirect("/404");
+}
+---
+
+<Layout 
+  title={`${year} Lietuvos švenčių kalendorius`}
+  description={`${year} metų Lietuvos švenčių ir nedarbo dienų kalendorius`}
+  >
+  <!-- canonicalURL={new URL(Astro.url.pathname, Astro.site).toString()} -->
+  <Calendar year={yearNumber} />
+</Layout>
