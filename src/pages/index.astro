@@ -1,7 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
 
-const CURRENT_YEAR: number = 2024;
+const CURRENT_YEAR: number = 2023;
 const LOCALE: string = "lt-LT";
 const weekFormatter = new Intl.DateTimeFormat(LOCALE, { weekday: "short" });
 
@@ -123,7 +123,7 @@ function getCalendarData(year: number): Day[][][] {
       const date = new Date(startOfWeek);
       date.setUTCDate(startOfWeek.getUTCDate() + i);
       const isCurrentMonth = date.getUTCMonth() === month;
-
+      
       const day: Day = {
         number: date.getUTCDate(),
         isHoliday: isHoliday(date),
@@ -145,39 +145,53 @@ function getCalendarData(year: number): Day[][][] {
       }
 
       return day;
-    })
-      .reduce((weeks, day, i) => {
-        const weekIndex = Math.floor(i / 7);
-        if (!weeks[weekIndex]) {
-          weeks[weekIndex] = [];
-        }
-        weeks[weekIndex].push(day);
-        return weeks;
-      }, [] as Day[][])
-      .map((week) => {
-        return week.map((day, i) => {
-          if (day.isOpportunity) {
-            const prevDay = week[i - 1];
-            const nextDay = week[i + 1];
-            if (
-              prevDay &&
-              prevDay.isCurrent &&
-              !isDayOff(new Date(Date.UTC(year, month, prevDay.number)))
-            ) {
-              prevDay.isOpportunity = true;
-            }
-            if (
-              nextDay &&
-              nextDay.isCurrent &&
-              !isDayOff(new Date(Date.UTC(year, month, nextDay.number)))
-            ) {
-              nextDay.isOpportunity = true;
-            }
+    }).reduce((weeks, day, i) => {
+      const weekIndex = Math.floor(i / 7);
+      if (!weeks[weekIndex]) {
+        weeks[weekIndex] = [];
+      }
+      weeks[weekIndex].push(day);
+      return weeks;
+    }, [] as Day[][]).map((week) => {
+      return week.map((day, i) => {
+        if (day.isOpportunity) {
+          const prevDay = week[i - 1];
+          const nextDay = week[i + 1];
+          if (prevDay && prevDay.isCurrent && !isDayOff(new Date(Date.UTC(year, month, prevDay.number)))) {
+            prevDay.isOpportunity = true;
           }
-          return day;
-        });
+          if (nextDay && nextDay.isCurrent && !isDayOff(new Date(Date.UTC(year, month, nextDay.number)))) {
+            nextDay.isOpportunity = true;
+          }
+        }
+        return day;
       });
+    });
   });
+}
+
+interface Opportunity {
+  month: number;
+  days: number[];
+}
+
+function getOpportunities(calendarData: Day[][][]): Opportunity[] {
+  return calendarData.flatMap((monthData, monthIndex) =>
+    monthData.flatMap((weekData) =>
+      weekData.filter((day) => day.isOpportunity && day.isCurrent)
+    ).length > 0
+      ? [
+          {
+            month: monthIndex,
+            days: monthData
+              .flatMap((weekData) =>
+                weekData.filter((day) => day.isOpportunity && day.isCurrent)
+              )
+              .map((day) => day.number),
+          },
+        ]
+      : []
+  );
 }
 
 function getCellClass(day: Day): string {
@@ -195,6 +209,7 @@ const weekdays: string[] = Array.from({ length: 7 }, (_, i) => {
 });
 
 const calendarData = getCalendarData(CURRENT_YEAR);
+const opportunities = getOpportunities(calendarData);
 
 const monthNames: string[] = Array.from({ length: 12 }, (_, i) => {
   const date = new Date(Date.UTC(CURRENT_YEAR, i, 1));
@@ -204,6 +219,16 @@ const monthNames: string[] = Array.from({ length: 12 }, (_, i) => {
 
 <Layout title="Kalendorius">
   <h1 class="text-4xl font-bold mb-8">{CURRENT_YEAR} Kalendorius</h1>
+  <div class="bg-white rounded shadow p-6 mb-8">
+    <h2 class="text-2xl font-semibold mb-4">Opportunity Summary</h2>
+    <ul class="list-disc list-inside">
+      {opportunities.map(({ month, days }) => (
+        <li class="mb-2">
+          <strong>{monthNames[month]}</strong>: {days.join(', ')}
+        </li>
+      ))}
+    </ul>
+  </div>
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
     {
       calendarData.map((month, monthIndex) => (
