@@ -1,70 +1,9 @@
 ---
 import Layout from "../layouts/Layout.astro";
 
+const CURRENT_YEAR: number = 2023;
 const LOCALE: string = "lt-LT";
-const CURRENT_YEAR: number = 2024;
-
-/**
- * Represents a date with day, month, weekday, week, and year properties.
- */
-type DateInfo = {
-  day: number;
-  month: number;
-  weekday: number;
-  week: number;
-  year: number;
-  isOff: boolean;
-  isWeekend: boolean;
-  isHoliday: boolean;
-};
-
-const LONG_WEEKDAYS_MAP = {
-  pirmadienis: 1,
-  antradienis: 2,
-  trečiadienis: 3,
-  ketvirtadienis: 4,
-  penktadienis: 5,
-  šeštadienis: 6,
-  sekmadienis: 7,
-};
-
-/**
- * Generates an array of dates for a specified number of years starting from a given year.
- *
- * @param startYear - The starting year for the date range (inclusive)
- * @param numYears - The number of years to generate dates for
- * @returns An array of DateInfo objects
- */
-function generateDateArray(
-  startYear: number,
-  numYears: number = 1
-): DateInfo[] {
-  let i = 0;
-  return Array.from({ length: numYears }, (_, yearOffset) => {
-    const year = startYear + yearOffset;
-
-    return Array.from({ length: 12 }, (_, month) => {
-      const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-      return Array.from({ length: daysInMonth }, (_, dayOffset) => {
-        i += 1;
-        const day = dayOffset + 1;
-        const date = new Date(year, month, day);
-        const week = Math.ceil(i / 7);
-
-        return {
-          day,
-          month: month + 1, // Months are 0-indexed, so add 1
-          weekday:
-            LONG_WEEKDAYS_MAP[date.toLocaleString(LOCALE, { weekday: "long" })],
-          week,
-          year,
-          i,
-        };
-      });
-    }).flat();
-  }).flat();
-}
+const weekFormatter = new Intl.DateTimeFormat(LOCALE, { weekday: "short" });
 
 function calculateEaster(year: number): Date {
   const a = year % 19;
@@ -132,10 +71,6 @@ const PUBLIC_HOLIDAYS = [
   { month: 12, day: 26, label: "Šv. Kalėdų antroji diena" },
 ];
 
-// const nonWeekendHolidays = PUBLIC_HOLIDAYS.filter(
-//   (holiday) => new Date(CURRENT_YEAR, holiday.month - 1, holiday.day).getUTCDay() !== 0
-// );
-
 type Holiday = (typeof PUBLIC_HOLIDAYS)[number];
 
 function isHoliday(date: Date): boolean {
@@ -155,101 +90,6 @@ function isDayOff(date: Date): boolean {
   return isWeekend(date) || isHoliday(date);
 }
 
-function getAllDates(year: number) {
-  const dates: DateInfo[] = [];
-  let month = 1,
-    week = 1,
-    weekday,
-    day = 1;
-  const initialDay = new Date(year, month - 1, day);
-  weekday = initialDay.getUTCDay() + 1;
-
-  while (month <= 12) {
-    while (day <= new Date(year, month, 0).getUTCDate()) {
-      const date = new Date(year, month - 1, day);
-      const isOff = !isWeekend(date) && isHoliday(date);
-
-      dates.push({
-        year,
-        month,
-        day,
-        weekday,
-        week,
-        isOff,
-        isWeekend: isWeekend(date),
-        isHoliday: isHoliday(date),
-      });
-      day++;
-      weekday = (weekday % 7) + 1;
-      if (weekday === 1) week++;
-    }
-    day = 1;
-    month++;
-  }
-
-  // always prepend first week filled (from previous year):
-  ({ week, weekday } = dates[0]);
-
-  if (weekday !== 1) {
-    for (let i = weekday; i > 1; i--) {
-      const prevDay = new Date(year - 1, 12, 0).getDate() - (weekday - i);
-      const date = new Date(year, month - 1, day);
-      const isOff = !isWeekend(date) && isHoliday(date);
-      dates.unshift({
-        year: year - 1,
-        month: 12,
-        day: prevDay,
-        weekday: i,
-        week: week,
-        isOff,
-        isWeekend: isWeekend(date),
-        isHoliday: isHoliday(date),
-      });
-    }
-  }
-
-  // always append last week filled (from next year):
-  ({ week, weekday } = dates.at(-1));
-  if (weekday !== 7) {
-    for (let i = weekday + 1; i <= 7; i++) {
-      const date = new Date(year, month - 1, day);
-      const isOff = !isWeekend(date) && isHoliday(date);
-      dates.push({
-        year: year,
-        month: 1,
-        day: i - weekday,
-        weekday: i,
-        week: week,
-        isOff,
-        isWeekend: isWeekend(date),
-        isHoliday: isHoliday(date),
-      });
-    }
-  }
-
-  return dates;
-}
-
-const allDates = getAllDates(2023);
-
-const parsedDates = allDates.map((date, i) => {
-  if (i < 5) return date;
-  const previousFiveDates = [];
-  const nextFiveDates = [];
-
-  for (let j = i; j > i - 5; j--) {
-    previousFiveDates.unshift(allDates[j]);
-  }
-
-  // console.log(previousFiveDates);
-
-  return {
-    ...date,
-  };
-});
-
-// console.log(parsedDates);
-
 function getHolidayLabel(date: Date): string | null {
   const day = date.getUTCDate();
   const month = date.getUTCMonth() + 1;
@@ -263,14 +103,16 @@ function getHolidayLabel(date: Date): string | null {
 }
 
 interface Day {
-  number: number | null;
-  isOff: boolean;
+  number?: number | null;
   isCurrent: boolean;
-  holidayLabel: string | null;
+  holidayLabel?: string | null;
+  isHoliday: boolean;
+  isWeekend: boolean;
+  isOpportunity: boolean;
 }
 
 function getCalendarData(year: number): Day[][][] {
-  const calendar: Day[][][] = [];
+  const months: Day[][][] = [];
 
   for (let month = 0; month < 12; month++) {
     let currentWeek: Day[] = [];
@@ -279,7 +121,7 @@ function getCalendarData(year: number): Day[][][] {
     // Determine the start of the week
     let startOfWeek = new Date(firstDay);
     // console.log(startOfWeek.getUTCDay());
-    while (startOfWeek.getUTCDay() > 1) {
+    while (startOfWeek.getUTCDay() !== 1) {
       startOfWeek.setUTCDate(startOfWeek.getUTCDate() - 1);
     }
 
@@ -287,19 +129,30 @@ function getCalendarData(year: number): Day[][][] {
     for (let i = 0; i < 6 * 7; i++) {
       const date = new Date(startOfWeek);
       date.setUTCDate(startOfWeek.getUTCDate() + i);
-
       const isCurrentMonth = date.getUTCMonth() === month;
-
+      
       const day: Day = {
         number: isCurrentMonth ? date.getUTCDate() : null,
-        isOff: isDayOff(date),
+        isHoliday: isHoliday(date),
+        isWeekend: isWeekend(date),
+        isOpportunity: false,
         isCurrent: true,
         holidayLabel: getHolidayLabel(date),
       };
 
-      currentWeek.push(day);
+      if (!isDayOff(date)) {
+        const offHits = [];
+        for (let j = -2; j <= 2; j++) {
+          const offDate = new Date(date);
+          offDate.setUTCDate(date.getUTCDate() + j);
+          if (isDayOff(offDate)) offHits.push(offDate);
+        }
+        if (offHits.length >= 3) {
+          day.isOpportunity = true;
+        }
+      }
 
-      // console.log(currentWeek);
+      currentWeek.push(day);
 
       if (currentWeek.length === 7) {
         monthData.push(currentWeek);
@@ -307,22 +160,24 @@ function getCalendarData(year: number): Day[][][] {
       }
     }
 
-    calendar.push(monthData);
+    months.push(monthData);
   }
 
-  return calendar;
+  return months;
 }
 
 function getCellClass(day: Day): string {
   const baseClass = "p-2 text-center relative group";
   if (day.number == null) return `${baseClass} text-gray-300`;
-  if (day.isOff) return `${baseClass} bg-red-100 font-bold`;
+  if (day.isOpportunity) return `${baseClass} bg-green-300 font-bold`;
+  if (day.isHoliday) return `${baseClass} bg-red-200`;
+  if (day.isWeekend) return `${baseClass} bg-gray-100`;
   return baseClass;
 }
 
 const weekdays: string[] = Array.from({ length: 7 }, (_, i) => {
   const date = new Date(Date.UTC(2023, 0, 2 + i)); // Start from Monday
-  return new Intl.DateTimeFormat(LOCALE, { weekday: "short" }).format(date);
+  return weekFormatter.format(date);
 });
 
 const calendarData = getCalendarData(CURRENT_YEAR);
