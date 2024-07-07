@@ -29,8 +29,9 @@ function getCellClass(day: Day): string {
       "bg-purple-100": day.isExtendedWeekend && !day.isLongWeekend,
       "text-red-600 font-bold": day.isHoliday || day.isWeekend,
       "text-green-600 font-bold": day.isOpportunity,
+      "text-gray-400": !day.isCurrentMonth,
     },
-    !day.isCurrentMonth && "text-gray-300"
+    !day.isCurrentMonth && "text-gray-300",
   );
 }
 ---
