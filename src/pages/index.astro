@@ -239,7 +239,9 @@ const monthNames: string[] = Array.from({ length: 12 }, (_, i) => {
         {CURRENT_YEAR} Kalendorius
       </h1>
       <div class="bg-white bg-opacity-10 rounded-lg p-12">
-        <h2 class="text-3xl font-bold mb-8 flex items-center justify-center">
+        <h2
+          class="text-3xl font-bold mb-8 flex items-center justify-center font-heading"
+        >
           <Icon
             name="ic:round-event-available"
             class="w-10 h-10 mr-3 text-amber-400"
@@ -258,9 +260,7 @@ const monthNames: string[] = Array.from({ length: 12 }, (_, i) => {
         </ul>
       </div>
     </div>
-    <div
-      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12"
-    >
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12">
       {
         calendarData.map((month, monthIndex) => (
           <div class="bg-white rounded-lg shadow-lg">
@@ -299,15 +299,3 @@ const monthNames: string[] = Array.from({ length: 12 }, (_, i) => {
     </div>
   </div>
 </Layout>
-
-<style>
-  @import url("https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@700;800&family=Manrope:wght@500;700&display=swap");
-
-  :global(body) {
-    font-family: "Manrope", sans-serif;
-  }
-
-  .font-heading {
-    font-family: "Roboto Slab", serif;
-  }
-</style>

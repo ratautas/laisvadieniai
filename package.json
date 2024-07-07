@@ -12,6 +12,8 @@
   "dependencies": {
     "@astrojs/check": "^0.7.0",
     "@astrojs/tailwind": "^5.1.0",
+    "@fontsource/manrope": "^5.0.20",
+    "@fontsource/roboto-slab": "^5.0.20",
     "@iconify-json/bi": "^1.1.23",
     "@iconify-json/ic": "^1.1.17",
     "astro": "^4.11.3",

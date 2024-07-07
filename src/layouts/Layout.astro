@@ -1,4 +1,9 @@
 ---
+import '@fontsource/manrope/400.css';
+import '@fontsource/manrope/700.css';
+import '@fontsource/roboto-slab/700.css';
+import '@fontsource/roboto-slab/800.css';
+
 interface Props {
   title: string;
   description: string;
@@ -12,7 +17,7 @@ const currentPath = Astro.url.pathname;
 ---
 
 <!doctype html>
-<html lang="lt">
+<html lang="lt" class="font-sans">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
@@ -29,20 +34,12 @@ const currentPath = Astro.url.pathname;
     <meta property="og:url" content={canonicalURL} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <!-- <meta
-      property="og:image"
-      content={new URL(image, canonicalURL).toString()}
-    /> -->
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
     <meta property="twitter:url" content={canonicalURL} />
     <meta property="twitter:title" content={title} />
     <meta property="twitter:description" content={description} />
-    <!-- <meta
-      property="twitter:image"
-      content={new URL(image, canonicalURL).toString()}
-    /> -->
 
     <!-- Favicon -->
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
@@ -53,21 +50,10 @@ const currentPath = Astro.url.pathname;
     <!-- Canonical URL -->
     <link rel="canonical" href={canonicalURL} />
 
-    <!--
-      Essential Tips:
-      1. Ensure that the title and meta description are unique and relevant for each page.
-      2. Use descriptive alt tags for images to improve accessibility and SEO.
-      3. Optimize images by compressing them and using appropriate formats (e.g., JPEG for photos, PNG for graphics).
-      4. Use meaningful and descriptive headings (H1, H2, etc.) to structure your content.
-      5. Ensure that your website is mobile-friendly and responsive across different devices.
-      6. Optimize your website's loading speed by minifying CSS and JavaScript, and lazy-loading images.
-      7. Use internal linking to help search engines understand the structure and relevance of your pages.
-      8. Add schema markup (e.g., JSON-LD) to provide additional context and information to search engines.
-      9. Submit an XML sitemap to search engines to help them discover and index your pages.
-      10. Monitor your website's performance and SEO using tools like Google Search Console and Analytics.
-    -->
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@700;800&family=Manrope:wght@500;700&display=swap" rel="stylesheet">
   </head>
-  <body>
+  <body class="font-sans">
     <nav class="navbar">
       <div class="navbar-container">
         <div class="navbar-brand">
@@ -122,22 +108,6 @@ const currentPath = Astro.url.pathname;
     --secondary: 79, 70, 229;
     --secondary-light: 187, 182, 255;
     --secondary-dark: 44, 38, 163;
-  }
-
-  html {
-    font-family: system-ui, sans-serif;
-  }
-
-  code {
-    font-family:
-      Menlo,
-      Monaco,
-      Lucida Console,
-      Liberation Mono,
-      DejaVu Sans Mono,
-      Bitstream Vera Sans Mono,
-      Courier New,
-      monospace;
   }
 
   /* Navbar styles */
