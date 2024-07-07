@@ -8,5 +8,6 @@ export default defineConfig({
   integrations: [
     tailwind(),
     icon()
-  ]
+  ],
+  site: 'http://localhost:4321',
 });

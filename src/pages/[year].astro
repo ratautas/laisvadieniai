@@ -19,7 +19,7 @@ if (isNaN(yearNumber)) {
 <Layout 
   title={`${year} Lietuvos švenčių kalendorius`}
   description={`${year} metų Lietuvos švenčių ir nedarbo dienų kalendorius`}
+  canonicalURL={new URL(Astro.url.pathname, Astro.site).toString()}
   >
-  <!-- canonicalURL={new URL(Astro.url.pathname, Astro.site).toString()} -->
   <Calendar year={yearNumber} />
 </Layout>
