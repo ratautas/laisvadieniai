@@ -1,5 +1,7 @@
 ---
 import { Icon } from "astro-icon/components";
+import { clsx } from "clsx";
+
 import {
   getCalendarData,
   getOpportunities,
@@ -19,14 +21,17 @@ const monthNames = getMonthNames(year);
 const weekdays = getWeekdayNames();
 
 function getCellClass(day: Day): string {
-  const baseClass = "p-2 text-center relative group";
-  if (!day.isCurrent) return `${baseClass} text-gray-300`;
-  if (day.isOpportunity)
-    return `${baseClass} bg-green-300 text-green-800 font-bold`;
-  if (day.isLongWeekend) return `${baseClass} bg-blue-200 text-blue-800`;
-  if (day.isHoliday) return `${baseClass} bg-red-200 text-red-800`;
-  if (day.isWeekend) return `${baseClass} bg-gray-100 text-gray-800`;
-  return baseClass;
+  return clsx(
+    "p-2 relative",
+    day.isCurrentMonth && {
+      "bg-gray-50": day.isWeekend,
+      "bg-blue-100": day.isLongWeekend,
+      "bg-purple-100": day.isExtendedWeekend && !day.isLongWeekend,
+      "text-red-600 font-bold": day.isHoliday || day.isWeekend,
+      "text-green-600 font-bold": day.isOpportunity,
+    },
+    !day.isCurrentMonth && "text-gray-300"
+  );
 }
 ---
 
@@ -78,7 +83,7 @@ function getCellClass(day: Day): string {
             </thead>
             <tbody class="text-gray-700 font-medium">
               {month.map((week) => (
-                <tr class="border-b border-gray-200 hover:bg-gray-100">
+                <tr class="border-b border-gray-200 hover:bg-gray-50 text-center">
                   {week.map((day) => (
                     <td class={getCellClass(day)}>
                       {day.number}
@@ -97,5 +102,31 @@ function getCellClass(day: Day): string {
         </div>
       ))
     }
+  </div>
+
+  <div class="mt-8 text-center">
+    <h3 class="text-2xl font-bold mb-4">Spalvų reikšmės</h3>
+    <div class="flex flex-wrap justify-center gap-4">
+      <div class="flex items-center">
+        <div class="w-4 h-4 bg-blue-100 mr-2"></div>
+        <span>Ilgasis savaitgalis</span>
+      </div>
+      <div class="flex items-center">
+        <div class="w-4 h-4 bg-purple-100 mr-2"></div>
+        <span>Pratęstas savaitgalis</span>
+      </div>
+      <div class="flex items-center">
+        <div class="w-4 h-4 mr-2 flex items-center justify-center">
+          <span class="text-red-600 font-bold">15</span>
+        </div>
+        <span>Šventinė diena</span>
+      </div>
+      <div class="flex items-center">
+        <div class="w-4 h-4 mr-2 flex items-center justify-center">
+          <span class="text-green-600 font-bold">15</span>
+        </div>
+        <span>Galimybės diena</span>
+      </div>
+    </div>
   </div>
 </div>
