@@ -1,25 +1,110 @@
 ---
 interface Props {
   title: string;
+  description: string;
+  canonicalURL: string;
+  image?: string;
 }
 
-const { title } = Astro.props;
+const {
+  title,
+  description,
+  canonicalURL,
+  // image = "/placeholder-image.jpg",
+  image = "",
+} = Astro.props;
+
+const currentPath = Astro.url.pathname;
 ---
 
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="description" content="Astro description" />
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
+
+    <!-- Primary Meta Tags -->
     <title>{title}</title>
+    <meta name="title" content={title} />
+    <meta name="description" content={description} />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <!-- <meta
+      property="og:image"
+      content={new URL(image, canonicalURL).toString()}
+    /> -->
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content={canonicalURL} />
+    <meta property="twitter:title" content={title} />
+    <meta property="twitter:description" content={description} />
+    <!-- <meta
+      property="twitter:image"
+      content={new URL(image, canonicalURL).toString()}
+    /> -->
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href={canonicalURL} />
   </head>
   <body>
+    <nav>
+      <div class="navbar">
+        <div class="navbar-brand">
+          <a href="/" class="navbar-item">Lithuanian Holidays</a>
+          <button class="navbar-burger" aria-label="menu" aria-expanded="false">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+          </button>
+        </div>
+        <div class="navbar-menu">
+          <div class="navbar-start">
+            <a
+              href="/"
+              class={currentPath === "/"
+                ? "navbar-item is-active"
+                : "navbar-item"}>Home</a
+            >
+            <a
+              href="/about"
+              class={currentPath === "/about"
+                ? "navbar-item is-active"
+                : "navbar-item"}>About</a
+            >
+            <a
+              href="/holidays"
+              class={currentPath === "/holidays"
+                ? "navbar-item is-active"
+                : "navbar-item"}>Holidays</a
+            >
+            <a
+              href="/contact"
+              class={currentPath === "/contact"
+                ? "navbar-item is-active"
+                : "navbar-item"}>Contact</a
+            >
+          </div>
+        </div>
+      </div>
+    </nav>
+
     <slot />
   </body>
 </html>
+
 <style is:global>
   :root {
     --accent: 136, 58, 234;
@@ -32,10 +117,11 @@ const { title } = Astro.props;
       white 60%
     );
   }
+
   html {
     font-family: system-ui, sans-serif;
-    background-size: 224px;
   }
+
   code {
     font-family:
       Menlo,
@@ -47,4 +133,78 @@ const { title } = Astro.props;
       Courier New,
       monospace;
   }
+
+  /* Navbar styles */
+  .navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .navbar-brand {
+    display: flex;
+    align-items: center;
+  }
+
+  .navbar-item {
+    color: #333;
+    text-decoration: none;
+    margin-right: 1rem;
+  }
+
+  .navbar-item.is-active {
+    font-weight: bold;
+  }
+
+  .navbar-burger {
+    display: none;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+  }
+
+  @media screen and (max-width: 768px) {
+    .navbar-menu {
+      display: none;
+    }
+
+    .navbar-burger {
+      display: block;
+    }
+
+    .navbar-menu.is-active {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      background-color: #fff;
+      padding: 1rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .navbar-start {
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
+
+    .navbar-item {
+      margin-right: 0;
+      margin-bottom: 1rem;
+    }
+  }
 </style>
+
+<script>
+  const navbarBurger = document.querySelector(".navbar-burger");
+  const navbarMenu = document.querySelector(".navbar-menu");
+
+  navbarBurger?.addEventListener("click", () => {
+    navbarBurger.classList.toggle("is-active");
+    navbarMenu?.classList.toggle("is-active");
+  });
+</script>
