@@ -1,4 +1,4 @@
-import { isWeekend } from './dateUtils';
+import { isWeekend, addDays } from './dateUtils';
 import { isHoliday, getHolidayLabel, getPublicHolidays } from './holidayUtils';
 
 export interface Day {
@@ -7,6 +7,7 @@ export interface Day {
   holidayLabel?: string | null;
   isHoliday: boolean;
   isWeekend: boolean;
+  isLongWeekend: boolean;
   isOpportunity: boolean;
 }
 
@@ -29,64 +30,62 @@ export function getCalendarData(year: number): Day[][][] {
       startOfWeek.setUTCDate(startOfWeek.getUTCDate() - 1);
     }
 
-    return Array.from({ length: 6 * 7 }, (_, i) => {
-      const date = new Date(startOfWeek);
-      date.setUTCDate(startOfWeek.getUTCDate() + i);
+    const monthData = Array.from({ length: 6 * 7 }, (_, i) => {
+      const date = addDays(startOfWeek, i);
       const isCurrentMonth = date.getUTCMonth() === month;
 
       const day: Day = {
         number: date.getUTCDate(),
         isHoliday: isHoliday(date, publicHolidays),
         isWeekend: isWeekend(date),
+        isLongWeekend: false,
         isOpportunity: false,
         isCurrent: isCurrentMonth,
         holidayLabel: getHolidayLabel(date, publicHolidays),
       };
 
-      if (isCurrentMonth && !isDayOff(date, publicHolidays)) {
-        const offHits = Array.from({ length: 5 }, (_, j) => {
-          const offDate = new Date(date);
-          offDate.setUTCDate(date.getUTCDate() + j - 2);
-          return isDayOff(offDate, publicHolidays);
-        });
-        if (offHits.filter(Boolean).length >= 3) {
-          day.isOpportunity = true;
+      return day;
+    });
+
+    // Identify long weekends
+    for (let i = 0; i < monthData.length; i++) {
+      if (isDayOff(addDays(startOfWeek, i), publicHolidays)) {
+        let consecutiveDaysOff = 1;
+        while (i + consecutiveDaysOff < monthData.length && isDayOff(addDays(startOfWeek, i + consecutiveDaysOff), publicHolidays)) {
+          consecutiveDaysOff++;
+        }
+        if (consecutiveDaysOff > 2) {
+          for (let j = 0; j < consecutiveDaysOff; j++) {
+            monthData[i + j].isLongWeekend = true;
+          }
+        }
+        i += consecutiveDaysOff - 1;
+      }
+    }
+
+    // Identify opportunity days
+    for (let i = 1; i < monthData.length - 1; i++) {
+      const prevDay = monthData[i - 1];
+      const currentDay = monthData[i];
+      const nextDay = monthData[i + 1];
+
+      if (currentDay.isCurrent && !isDayOff(addDays(startOfWeek, i), publicHolidays)) {
+        if ((prevDay.isWeekend || prevDay.isHoliday) && (nextDay.isWeekend || nextDay.isHoliday)) {
+          currentDay.isOpportunity = true;
+          prevDay.isOpportunity = true;
+          nextDay.isOpportunity = true;
         }
       }
+    }
 
-      return day;
-    })
-      .reduce((weeks, day, i) => {
-        const weekIndex = Math.floor(i / 7);
-        if (!weeks[weekIndex]) {
-          weeks[weekIndex] = [];
-        }
-        weeks[weekIndex].push(day);
-        return weeks;
-      }, [] as Day[][])
-      .map((week) => {
-        return week.map((day, i) => {
-          if (day.isOpportunity) {
-            const prevDay = week[i - 1];
-            const nextDay = week[i + 1];
-            if (
-              prevDay &&
-              prevDay.isCurrent &&
-              !isDayOff(new Date(Date.UTC(year, month, prevDay.number)), publicHolidays)
-            ) {
-              prevDay.isOpportunity = true;
-            }
-            if (
-              nextDay &&
-              nextDay.isCurrent &&
-              !isDayOff(new Date(Date.UTC(year, month, nextDay.number)), publicHolidays)
-            ) {
-              nextDay.isOpportunity = true;
-            }
-          }
-          return day;
-        });
-      });
+    return monthData.reduce((weeks, day, i) => {
+      const weekIndex = Math.floor(i / 7);
+      if (!weeks[weekIndex]) {
+        weeks[weekIndex] = [];
+      }
+      weeks[weekIndex].push(day);
+      return weeks;
+    }, [] as Day[][]);
   });
 }
 
@@ -107,13 +106,4 @@ export function getOpportunities(calendarData: Day[][][]): Opportunity[] {
       ]
       : []
   );
-}
-
-export function getCellClass(day: Day): string {
-  const baseClass = "p-2 text-center relative group";
-  if (!day.isCurrent) return `${baseClass} text-gray-300`;
-  if (day.isOpportunity) return `${baseClass} bg-green-300 font-bold`;
-  if (day.isHoliday) return `${baseClass} bg-red-200`;
-  if (day.isWeekend) return `${baseClass} bg-gray-100`;
-  return baseClass;
 }

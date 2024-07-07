@@ -3,7 +3,7 @@ import { Icon } from "astro-icon/components";
 import {
   getCalendarData,
   getOpportunities,
-  getCellClass,
+  type Day,
 } from "../utils/calendarUtils";
 import { getMonthNames, getWeekdayNames } from "../utils/dateUtils";
 
@@ -17,6 +17,17 @@ const calendarData = getCalendarData(year);
 const opportunities = getOpportunities(calendarData);
 const monthNames = getMonthNames(year);
 const weekdays = getWeekdayNames();
+
+function getCellClass(day: Day): string {
+  const baseClass = "p-2 text-center relative group";
+  if (!day.isCurrent) return `${baseClass} text-gray-300`;
+  if (day.isOpportunity)
+    return `${baseClass} bg-green-300 text-green-800 font-bold`;
+  if (day.isLongWeekend) return `${baseClass} bg-blue-200 text-blue-800`;
+  if (day.isHoliday) return `${baseClass} bg-red-200 text-red-800`;
+  if (day.isWeekend) return `${baseClass} bg-gray-100 text-gray-800`;
+  return baseClass;
+}
 ---
 
 <div class="container mx-auto px-8 py-16">
