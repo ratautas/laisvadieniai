@@ -6,19 +6,13 @@ interface Props {
   image?: string;
 }
 
-const {
-  title,
-  description,
-  canonicalURL,
-  // image = "/placeholder-image.jpg",
-  image = "",
-} = Astro.props;
+const { title, description, canonicalURL, image = "" } = Astro.props;
 
 const currentPath = Astro.url.pathname;
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="lt">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
@@ -58,18 +52,33 @@ const currentPath = Astro.url.pathname;
 
     <!-- Canonical URL -->
     <link rel="canonical" href={canonicalURL} />
+
+    <!--
+      Essential Tips:
+      1. Ensure that the title and meta description are unique and relevant for each page.
+      2. Use descriptive alt tags for images to improve accessibility and SEO.
+      3. Optimize images by compressing them and using appropriate formats (e.g., JPEG for photos, PNG for graphics).
+      4. Use meaningful and descriptive headings (H1, H2, etc.) to structure your content.
+      5. Ensure that your website is mobile-friendly and responsive across different devices.
+      6. Optimize your website's loading speed by minifying CSS and JavaScript, and lazy-loading images.
+      7. Use internal linking to help search engines understand the structure and relevance of your pages.
+      8. Add schema markup (e.g., JSON-LD) to provide additional context and information to search engines.
+      9. Submit an XML sitemap to search engines to help them discover and index your pages.
+      10. Monitor your website's performance and SEO using tools like Google Search Console and Analytics.
+    -->
   </head>
   <body>
-    <nav>
-      <div class="navbar">
+    <nav class="navbar">
+      <div class="navbar-container">
         <div class="navbar-brand">
           <a href="/" class="navbar-item">Lithuanian Holidays</a>
-          <button class="navbar-burger" aria-label="menu" aria-expanded="false">
+          <label for="navbar-toggle" class="navbar-burger">
             <span aria-hidden="true"></span>
             <span aria-hidden="true"></span>
             <span aria-hidden="true"></span>
-          </button>
+          </label>
         </div>
+        <input type="checkbox" id="navbar-toggle" class="navbar-toggle" />
         <div class="navbar-menu">
           <div class="navbar-start">
             <a
@@ -107,15 +116,12 @@ const currentPath = Astro.url.pathname;
 
 <style is:global>
   :root {
-    --accent: 136, 58, 234;
-    --accent-light: 224, 204, 250;
-    --accent-dark: 49, 10, 101;
-    --accent-gradient: linear-gradient(
-      45deg,
-      rgb(var(--accent)),
-      rgb(var(--accent-light)) 30%,
-      white 60%
-    );
+    --accent: 255, 110, 64;
+    --accent-light: 255, 211, 176;
+    --accent-dark: 230, 74, 25;
+    --secondary: 79, 70, 229;
+    --secondary-light: 187, 182, 255;
+    --secondary-dark: 44, 38, 163;
   }
 
   html {
@@ -136,12 +142,23 @@ const currentPath = Astro.url.pathname;
 
   /* Navbar styles */
   .navbar {
+    position: sticky;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 999;
+    backdrop-filter: blur(8px);
+    background-color: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .navbar-container {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 1rem;
-    background-color: #fff;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    max-width: 1200px;
+    margin: 0 auto;
   }
 
   .navbar-brand {
@@ -150,40 +167,43 @@ const currentPath = Astro.url.pathname;
   }
 
   .navbar-item {
-    color: #333;
+    color: rgba(var(--secondary-dark), 1);
     text-decoration: none;
     margin-right: 1rem;
   }
 
   .navbar-item.is-active {
+    color: rgba(var(--accent), 1);
     font-weight: bold;
   }
 
   .navbar-burger {
     display: none;
     cursor: pointer;
-    background: none;
-    border: none;
-    padding: 0;
+  }
+
+  .navbar-toggle {
+    display: none;
   }
 
   @media screen and (max-width: 768px) {
     .navbar-menu {
       display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background-color: rgba(255, 255, 255, 0.8);
+      padding: 1rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
     .navbar-burger {
       display: block;
     }
 
-    .navbar-menu.is-active {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      width: 100%;
-      background-color: #fff;
-      padding: 1rem;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    .navbar-toggle:checked ~ .navbar-menu {
+      display: block;
     }
 
     .navbar-start {
@@ -198,13 +218,3 @@ const currentPath = Astro.url.pathname;
     }
   }
 </style>
-
-<script>
-  const navbarBurger = document.querySelector(".navbar-burger");
-  const navbarMenu = document.querySelector(".navbar-menu");
-
-  navbarBurger?.addEventListener("click", () => {
-    navbarBurger.classList.toggle("is-active");
-    navbarMenu?.classList.toggle("is-active");
-  });
-</script>
