@@ -31,7 +31,7 @@ function getCellClass(day: Day): string {
       "text-green-600 font-bold": day.isOpportunity,
       "text-gray-400": !day.isCurrentMonth,
     },
-    !day.isCurrentMonth && "text-gray-300",
+    !day.isCurrentMonth && "text-gray-300"
   );
 }
 ---
@@ -40,12 +40,26 @@ function getCellClass(day: Day): string {
   <div
     class="bg-gradient-to-r from-slate-800 to-slate-900 text-white py-20 px-12 rounded-lg shadow-xl mb-20"
   >
-    <h1
-      class="text-6xl font-extrabold mb-12 font-heading tracking-tight text-center"
-    >
-      {year} Kalendorius
-    </h1>
-    <div class="bg-white bg-opacity-10 rounded-lg p-12">
+    <div class="flex items-center justify-between">
+      <a
+        href={`/${year - 1}`}
+        class="text-white hover:text-amber-400 transition-colors duration-200"
+      >
+        <Icon name="ic:round-chevron-left" class="w-8 h-8" />
+      </a>
+      <h1
+        class="text-6xl font-extrabold font-heading tracking-tight text-center"
+      >
+        {year} Kalendorius
+      </h1>
+      <a
+        href={`/${year + 1}`}
+        class="text-white hover:text-amber-400 transition-colors duration-200"
+      >
+        <Icon name="ic:round-chevron-right" class="w-8 h-8" />
+      </a>
+    </div>
+    <div class="bg-white bg-opacity-10 rounded-lg p-12 mt-12">
       <h2
         class="text-3xl font-bold mb-8 flex items-center justify-center font-heading"
       >
