@@ -58,7 +58,9 @@ export function getCalendarData(year: number): Day[][][] {
         }
         if (consecutiveDaysOff > 2) {
           for (let j = 0; j < consecutiveDaysOff; j++) {
-            monthData[i + j].isLongWeekend = true;
+            if (monthData[i + j].isCurrentMonth) {
+              monthData[i + j].isLongWeekend = true;
+            }
           }
         }
         i += consecutiveDaysOff - 1;
@@ -89,7 +91,9 @@ export function getCalendarData(year: number): Day[][][] {
         }
         if (extendedWeekendLength > 2) {
           for (let j = 0; j < extendedWeekendLength; j++) {
-            monthData[i + j].isExtendedWeekend = true;
+            if (monthData[i + j].isCurrentMonth) {
+              monthData[i + j].isExtendedWeekend = true;
+            }
           }
         }
         i += extendedWeekendLength - 1;

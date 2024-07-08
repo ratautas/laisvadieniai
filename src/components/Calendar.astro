@@ -24,7 +24,7 @@ function getCellClass(day: Day): string {
   return clsx(
     "p-2 relative",
     day.isCurrentMonth && {
-      "bg-gray-50": day.isWeekend,
+      "bg-gray-50": day.isWeekend && !day.isLongWeekend,
       "bg-blue-100": day.isLongWeekend,
       "bg-purple-100": day.isExtendedWeekend && !day.isLongWeekend,
       "text-red-600 font-bold": day.isHoliday || day.isWeekend,
